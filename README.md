@@ -1,7 +1,7 @@
 # 此项目是用于秒杀活动中后台基本实现
 demo.sql 是数据库文件,ih_store是商品库存信息,商品默认数量是500，以下是以500进行压力测试
 环境：
-    操作系统是unbutun,
+    操作系统是Ubuntu 18.04.5 LTS,
     virtual box的homestead
     宿主机macbook air,4G内存,1.6G Intel core i5
 压力测试工具: webbench
