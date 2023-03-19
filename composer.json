@@ -1,0 +1,19 @@
+{
+	"name":"jackminh/miaosha",
+	"type":"project",
+	"description":"the miaosha action",
+	"license":"MIT",
+	"autoload":{
+		"psr-4":{
+			"Miaosha\\":"src/"
+		}
+	},
+	"autoload-dev":{
+		"psr-4":{
+			"Tests\\":"tests/"
+		}
+	},
+	"require": {
+		"monolog/monolog": "^2.9"
+	}
+}
