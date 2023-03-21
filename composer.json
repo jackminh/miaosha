@@ -1,7 +1,7 @@
 {
 	"name":"jackminh/miaosha",
 	"type":"project",
-	"description":"the miaosha action",
+	"description":"the miaosha activity",
 	"license":"MIT",
 	"autoload":{
 		"psr-4":{
@@ -10,10 +10,13 @@
 	},
 	"autoload-dev":{
 		"psr-4":{
-			"Tests\\":"tests/"
+			"Miaosha\\Tests\\":"tests/"
 		}
 	},
 	"require": {
-		"monolog/monolog": "^2.9"
+		"monolog/monolog": "^2.9"	
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^9"
 	}
 }
