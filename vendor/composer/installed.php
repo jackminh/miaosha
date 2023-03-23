@@ -3,7 +3,7 @@
         'name' => 'jackminh/miaosha',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '81a6bfc1a3fa26cec260f16f6afee93721186c3d',
+        'reference' => 'e4cda387d3114ae3c1639698edf71cd5ec2b99c8',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -22,7 +22,7 @@
         'jackminh/miaosha' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '81a6bfc1a3fa26cec260f16f6afee93721186c3d',
+            'reference' => 'e4cda387d3114ae3c1639698edf71cd5ec2b99c8',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
