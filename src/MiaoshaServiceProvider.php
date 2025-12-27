@@ -21,6 +21,10 @@ class MiaoshaServiceProvider extends ServiceProvider
             __DIR__ . '/../database/migrations/' =>  database_path('migrations')
 
         ],'miaosha-migrations');
+        //数据填充
+        $this->publishes([
+            __DIR__.'/../database/seeders/' => database_path('seeders/'),
+        ], 'miaosha-seeds');
         //注册命令
         if($this->app->runningInConsole()){
             $this->commands([

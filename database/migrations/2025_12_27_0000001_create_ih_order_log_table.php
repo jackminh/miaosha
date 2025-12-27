@@ -9,12 +9,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ih_order_log', function (Blueprint $table) {
+            $table->engine('InnoDB');
+            $table->charset('utf8mb4');
+            $table->collation("utf8mb4_unicode_ci");
+            $table->comment('订单日志表');
             $table->id();
             $table->integer('order_id')->comment('订单id');
             $table->integer('handle_id')->comment('操作人id');
             $table->integer('shop_id')->comment('店铺id');
             $table->unsignedSmallInteger('channel')->comment('渠道编号。变动方式。');
-            $table->tinyInteger('type')->comment('操作类型;0-会员;1-门店');
+            $table->tinyInteger('type')->nullable()->default(0)->comment('操作类型;0-会员;1-门店');
             $table->text('content')->nullable()->comment('日志内容');
             $table->timestamps();
             $table->softDeletes();
