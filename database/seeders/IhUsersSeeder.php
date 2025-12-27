@@ -1,6 +1,6 @@
 <?php
 
-namespace Jackminh\Miaosha\Database\Seeders;
+namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -36,17 +36,19 @@ class IhUsersSeeder extends Seeder
                 }
                 $firstName = $this->generateChineseFirstName();
                 $lastName = $this->generateChineseLastName();
+                $name = $lastName . $firstName;
                 $users[] = [
                     'sn'         => create_user_sn(),
-                    'real_name'  => $lastName . $firstName ,
+                    'real_name'  => $name,
                     'nickname'   => $this->generateUniqueNickname(),
-                    'account'    => $this->generateUniqueEmail($name),
+                    'account'    => $this->generateUniqueEmail(),
                     'password'   => Hash::make('password' . rand(1000, 9999))
                 ];
             }
             // 批量插入
             DB::table('users')->insert($users);
         }
+        $this->command->info('用户数据生成完成！');
     }
     
     private function generateChineseFirstName(): string
@@ -69,11 +71,11 @@ class IhUsersSeeder extends Seeder
         return $prefix . $suffix . rand(100, 999);
     }
     
-    private function generateUniqueEmail(string $name): string
+    private function generateUniqueEmail(): string
     {
         $domain = $this->domains[array_rand($this->domains)];
         $randomNumber = rand(1000, 9999);
         
-        return strtolower(pinyin($name, PINYIN_ASCII)) . $randomNumber . '@' . $domain;
+        return getRandChar(6). $randomNumber . '@' . $domain;
     }
 }
