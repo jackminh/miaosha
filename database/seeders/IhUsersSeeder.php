@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
 class IhUsersSeeder extends Seeder
 {
@@ -25,8 +24,8 @@ class IhUsersSeeder extends Seeder
     
     public function run(): void
     {
-        $batchSize  = 1000;    // 每批插入数量
-        $totalUsers = 10000; // 总用户数
+        $batchSize  = 10;    // 每批插入数量
+        $totalUsers = 1000; // 总用户数
         $batches = ceil($totalUsers / $batchSize);
         for($batch = 0; $batch < $batches; $batch++) {
             $users = [];
@@ -42,11 +41,11 @@ class IhUsersSeeder extends Seeder
                     'real_name'  => $name,
                     'nickname'   => $this->generateUniqueNickname(),
                     'account'    => $this->generateUniqueEmail(),
-                    'password'   => Hash::make('password' . rand(1000, 9999))
+                    'password'   => generatePassword('123456',rand())
                 ];
             }
             // 批量插入
-            DB::table('users')->insert($users);
+            DB::table('ih_user')->insert($users);
         }
         $this->command->info('用户数据生成完成！');
     }
