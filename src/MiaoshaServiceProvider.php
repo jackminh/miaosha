@@ -5,6 +5,14 @@ namespace Jackminh\Miaosha;
 use Illuminate\Support\ServiceProvider;
 use Jackminh\Miaosha\Console\Commands\MiaoshaCommand;
 use Jackminh\Miaosha\Services\MiaoshaService;
+use Jackminh\Miaosha\Contracts\UserRepositoryInterface;
+use Jackminh\Miaosha\Contracts\GoodsRepositoryInterface;
+
+use Jackminh\Miaosha\Repositories\UserRepository;
+use Jackminh\Miaosha\Repositories\GoodsRepository;
+
+use Jackminh\Miaosha\Contracts\GoodsItemRepositoryInterface;
+use Jackminh\Miaosha\Repositories\GoodsItemRepository;
 
 class MiaoshaServiceProvider extends ServiceProvider
 {
@@ -37,6 +45,12 @@ class MiaoshaServiceProvider extends ServiceProvider
 
     public function register()
     {
+         // 注册 Repository 绑定
+        $this->app->bind(GoodsRepositoryInterface::class, GoodsRepository::class);
+        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->bind(GoodsItemRepositoryInterface::class, GoodsItemRepository::class);
+        
+
         $this->mergeConfigFrom(
             __DIR__.'/../config/miaosha.php','miaosha'
         );
