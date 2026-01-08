@@ -4,10 +4,10 @@ namespace Jackminh\Miaosha\Console\Commands;
 
 use Illuminate\Console\Command;
 use Jackminh\Miaosha\Services\SeckillService;
-use Jackminh\Miaosha\Services\SeckilltokenService;
+use Jackminh\Miaosha\Services\SeckillTokenService;
 use Jackminh\Miaosha\Services\AntifraudService;
 use Jackminh\Miaosha\Services\OrderService;
-use Jackminh\Miaosha\Services\SeckillorderService;
+use Jackminh\Miaosha\Services\SeckillOrderService;
 
 
 class MiaoshaCommand extends Command
@@ -16,21 +16,21 @@ class MiaoshaCommand extends Command
 	protected $signature = 'jackminh:miaosha:start';
     protected $description = '秒杀开始';
     protected SeckillService $seckillService;
-    protected SeckilltokenService $seckilltokenService;
+    protected SeckillTokenService $seckillTokenService;
     protected AntifraudService $antifraudService;
     protected OrderService $orderService;
-    protected SeckillorderService $seckillorderService;
+    protected SeckillOrderService $seckillOrderService;
     /**
      * 构造函数注入
      */
-    public function __construct(SeckillService $seckillService, SeckilltokenService $seckilltokenService, AntifraudService $antifraudService, OrderService $orderService, SeckillorderService $seckillorderService)
+    public function __construct(SeckillService $seckillService, SeckillTokenService $seckillTokenService, AntifraudService $antifraudService, OrderService $orderService, SeckillOrderService $seckillOrderService)
     {
         parent::__construct();
         $this->seckillService = $seckillService;
-        $this->seckilltokenService = $seckilltokenService;
+        $this->seckillTokenService = $seckillTokenService;
         $this->antifraudService = $antifraudService;
         $this->orderService = $orderService;
-        $this->seckillorderService = $seckillorderService;
+        $this->seckillOrderService = $seckillOrderService;
     }
 
     public function handle(): int
@@ -67,7 +67,7 @@ class MiaoshaCommand extends Command
             return $result;
         }
         // 2. 生成令牌（带过期时间）
-        $token = $this->seckilltokenService->generateToken($userId, $activityId);
+        $token = $this->seckillTokenService->generateToken($userId, $activityId);
         $result = [
               'status'    => 1,
               'data'      => [
@@ -76,7 +76,7 @@ class MiaoshaCommand extends Command
                      'server_time' => time(),
                      'start_time'  => strtotime($activity->start_time)
               ],
-              'message'   => "您没有参与资格"
+              'message'   => "获取成功"
         ];
         return $result;
     }
@@ -89,6 +89,7 @@ class MiaoshaCommand extends Command
     {
 
         $res = $this->getToken();
+        $token = "";
         if($res['status'] == 1){
             $token = $res['data']['token'];
         }
@@ -105,7 +106,7 @@ class MiaoshaCommand extends Command
         
         try {
             // 1. 令牌验证
-            if(!$this->seckilltokenService->verifyToken($token)) {
+            if(!$this->seckillTokenService->verifyToken($token)) {
                 $result = [
                   'status'    => 0,
                   'data'      => [],
@@ -163,7 +164,7 @@ class MiaoshaCommand extends Command
             }
 
             //生成订单号
-            $orderNo = $this->seckillorderService->generateOrderNo();
+            $orderNo = $this->seckillOrderService->generateOrderNo();
             
             //发送到消息队列异步创建订单
             $this->seckillService->pushToOrderQueue([
@@ -175,7 +176,7 @@ class MiaoshaCommand extends Command
                 'created_at'   => time()
             ]);
             //标记令牌已使用
-            $this->seckilltokenService->useToken($token);
+            $this->seckillTokenService->useToken($token);
             
             $result = [
                   'status'    => 1,

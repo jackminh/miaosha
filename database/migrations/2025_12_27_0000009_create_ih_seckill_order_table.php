@@ -26,7 +26,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique('order_sn', 'uk_order_sn');
-            $table->unique(['activity_id', 'user_id'], 'uk_activity_user')->comment('防止重复下单');
             $table->index('user_id', 'idx_user_id');
             $table->index('activity_id', 'idx_activity_id');
             $table->index('created_at', 'idx_created_at');

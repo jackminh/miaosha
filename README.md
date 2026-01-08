@@ -186,3 +186,22 @@ $paymentQueueKey = "queue:seckill_payment";                 // 支付队列
 │  └──────────┘ └──────────┘ └──────────┘ └──────────┘      │
 └─────────────────────────────────────────────────────────────┘
 
+# 命令执行顺序
+1. 预热数据到redis
+php artisan jackminh:miaosha:hot
+"seckill:inventory:{activity_id}";            // 库存数量
+"seckill:sold:{activity_id}";                 // 已售数量
+2. 开始活动
+update ih_seckill_activity set status=1 where id=1;
+
+3. 提前创建好token (提供一个接口给前端，现通过命令来生成)
+php artisan jackminh:miaosha:token
+"seckill:token:user:{user_id}:{activit_id}" //生的用户与活动的关系
+"seckill:token:{token}"  //生成令牌
+
+4. 秒杀开始
+php artisan jackminh:miaosha:start
+
+5. 队列消费
+php artisan jackminh:miaosha:consumer
+

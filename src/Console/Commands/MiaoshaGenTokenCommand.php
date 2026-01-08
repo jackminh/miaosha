@@ -3,21 +3,21 @@
 namespace Jackminh\Miaosha\Console\Commands;
 
 use Illuminate\Console\Command;
-use Jackminh\Miaosha\Services\SeckilltokenService;
+use Jackminh\Miaosha\Services\SeckillTokenService;
 
 class MiaoshaGenTokenCommand extends Command
 {
 	
 	protected $signature = 'jackminh:miaosha:token';
     protected $description = '秒杀token获取';
-    protected SeckilltokenService $seckilltokenService;
+    protected SeckillTokenService $seckillTokenService;
     /**
      * 构造函数注入
      */
-    public function __construct(SeckilltokenService $seckilltokenService)
+    public function __construct(SeckillTokenService $seckillTokenService)
     {
         parent::__construct();
-        $this->seckilltokenService = $seckilltokenService;
+        $this->seckillTokenService = $seckillTokenService;
     }
 
     public function handle(): int
@@ -25,7 +25,7 @@ class MiaoshaGenTokenCommand extends Command
         $activityId = 1;
         $userId     = 1;
         $productId = 10;
-        $token = $this->seckilltokenService->generateToken($userId, $activityId, $productId);
+        $token = $this->seckillTokenService->generateToken($userId, $activityId, $productId);
         $this->info($token);
         return self::SUCCESS;
     }

@@ -4,7 +4,7 @@ namespace Jackminh\Miaosha\Facades;
 use Illuminate\Support\Facades\Facade;
 
 
-class Seckilltoken extends Facade
+class SeckillToken extends Facade
 {
 
 	protected static function getFacadeAccessor()

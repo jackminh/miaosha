@@ -5,6 +5,7 @@ use Jackminh\Miaosha\Repositories\SeckillActivityRepository;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\App;
 
 class SeckillService
 {
@@ -13,11 +14,12 @@ class SeckillService
     
     // Lua 脚本
     private $decreaseStockScript;
+
+    protected $config;
     
-    public function __construct(
-        SeckillActivityRepository $activityRepository
-    ) {
-        $this->activityRepository = $activityRepository;
+    public function __construct(array $config = []) {
+        $this->activityRepository = App::make(SeckillActivityRepository::class);
+        $this->config = $config ?: config("miaosha",[]);
         $this->redis = Redis::connection('seckill')->client();
         // 加载 Lua 脚本
         $this->decreaseStockScript = $this->loadDecreaseStockScript();
@@ -30,13 +32,18 @@ class SeckillService
     public function checkActivity($activityId)
     {
         $activity = $this->activityRepository->findById($activityId);
+        if (!$activity || $activity->status != 1) { //1:活动进行中
+            return false;
+        }
+        $now = time();
+
+        if ($now < strtotime($activity->start_time)) {
+            return false;
+        }
+        if ($now > strtotime($activity->end_time)) {
+            return false;
+        }
         
-        if (!$activity || $activity->status != 0) {
-            return false;
-        }
-        if(strtotime($activity->end_time) < time()){
-            return false;
-        }
         return $activity;
 
     }
@@ -50,7 +57,7 @@ class SeckillService
         try {
             // 1. 获取活动信息
             $activity = $this->activityRepository->findById($activityId);
-            if (!$activity || $activity->status != 0) {
+            if (!$activity || $activity->status != 1) { //状态：0-未开始 1-进行中 2-已结束 3-已取消
                 return ['success' => false, 'message' => '活动已结束'];
             }
             // 2. 使用 Lua 脚本原子性扣减库存
@@ -184,11 +191,7 @@ class SeckillService
         if ($this->isInBlacklist($userId)) {
             return false;
         }
-        // 2. 检查是否已购买
-        if ($this->hasPurchased($userId, $activityId)) {
-            return false;
-        }
-        // 3. 检查活动时间
+        // 2. 检查活动时间
         $activity = $this->activityRepository->findById($activityId);
         $now = time();
         if ($now < strtotime($activity->start_time)) {
@@ -210,7 +213,7 @@ class SeckillService
         $soldKey = "seckill:sold:{$activityId}";
         
         $remainingStock = Redis::connection('seckill')->get($inventoryKey) ?? 0;
-        $soldCount = Redis::connection('seckill')->get($soldKey) ?? 0;
+        $soldCount      = Redis::connection('seckill')->get($soldKey) ?? 0;
         
         // 更新数据库
         DB::transaction(function () use ($activityId, $remainingStock, $soldCount) {
@@ -292,17 +295,6 @@ LUA;
     {
         $blacklistKey = "seckill:blacklist:{$userId}";
         return Redis::connection('seckill')->exists($blacklistKey);
-    }
-    /**
-     * 检查是否已购买
-     * @param  [type]  $userId     [description]
-     * @param  [type]  $activityId [description]
-     * @return boolean             [description]
-     */
-    private function hasPurchased($userId, $activityId)
-    {
-        $userOrderKey = "seckill:user_order:{$activityId}:{$userId}";
-        return Redis::connection('seckill')->exists($userOrderKey);
     }
 
 

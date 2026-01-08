@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Redis;
 
-class SeckilltokenService
+class SeckillTokenService
 {
     protected array $config;
 
@@ -39,24 +39,27 @@ class SeckilltokenService
      */
     protected function storeToken(string $token, $userId, $activityId, $productId = null): void
     {
-        $ttl    = $this->config['seckill']['seckill_token_ttl'];
-        $prefix = $this->config['seckill']['seckill_token_prefix'];
-        $key    = $prefix . $token;
-        $data = [
-            'user_id'     => $userId,
-            'activity_id' => $activityId,
-            'product_id'  => $productId,
-            'created_at'  => now()->toDateTimeString(),
-            'expires_at'  => now()->addSeconds($ttl)->toDateTimeString(),
-            'status'      => 'pending', // pending, used, expired
-        ];
-        Redis::connection('seckill')->setex($key, $ttl, json_encode($data));
-        //同时存储用户ID和活动ID的映射，方便查询
-        Redis::connection('seckill')->setex(
-            $prefix . "user:{$userId}:activity:{$activityId}",
-            $ttl,
-            $token
-        );
+        try{
+            $ttl    = $this->config['seckill']['seckill_token_ttl'];
+            $prefix = $this->config['seckill']['seckill_token_prefix'];
+            $key    = $prefix . $token;
+            $data = [
+                'user_id'     => $userId,
+                'activity_id' => $activityId,
+                'product_id'  => $productId,
+                'created_at'  => now()->toDateTimeString(),
+                'expires_at'  => now()->addSeconds($ttl)->toDateTimeString(),
+                'status'      => 'pending', // pending, used, expired
+            ];
+            Redis::connection('seckill')->setex($key, $ttl, json_encode($data));
+        }catch(\Exception $e){
+            Log::error('创建token失败', [
+                'data'  => $data,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
+        
     }
     
     /**
@@ -94,20 +97,28 @@ class SeckilltokenService
      */
     public function useToken(string $token): bool
     {
-        $prefix = $this->config['seckill']['seckill_token_prefix'];
-        $ttl    = $this->config['seckill']['seckill_token_ttl'];
-        $key    = $prefix . $token;
-        $data   = Redis::connection('seckill')->get($key);
-        if (!$data) {
+        try{
+            $prefix = $this->config['seckill']['seckill_token_prefix'];
+            $ttl    = $this->config['seckill']['seckill_token_ttl'];
+            $key    = $prefix . $token;
+            $data   = Redis::connection('seckill')->get($key);
+            if (!$data) {
+                return false;
+            }
+            $tokenData = json_decode($data, true);
+            $tokenData['status'] = 'used';
+            $tokenData['used_at'] = now()->toDateTimeString();
+            
+            //更新令牌状态
+            Redis::connection('seckill')->setex($key, $ttl, json_encode($tokenData));
+        }catch(\Exception $e){
+            Log::error('标记token已使用失败', [
+                'token'  => $token,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             return false;
         }
-        $tokenData = json_decode($data, true);
-        $tokenData['status'] = 'used';
-        $tokenData['used_at'] = now()->toDateTimeString();
-        
-        //更新令牌状态
-        Redis::connection('seckill')->setex($key, $ttl, json_encode($tokenData));
-        
         return true;
     }
 

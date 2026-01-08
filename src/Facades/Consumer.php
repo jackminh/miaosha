@@ -4,15 +4,12 @@ namespace Jackminh\Miaosha\Facades;
 use Illuminate\Support\Facades\Facade;
 
 
-class SeckillOrder extends Facade
+class Consumer extends Facade
 {
 
 	protected static function getFacadeAccessor()
     {
-        return 'seckillorder';
+        return 'consumer';
     }
     
 }
-
-
-
