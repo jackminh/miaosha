@@ -2,7 +2,6 @@
 
 namespace Jackminh\Miaosha\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Jackminh\Miaosha\Scopes\UserScope;
 use Jackminh\Miaosha\Traits\HasSex;
@@ -54,7 +53,7 @@ class User extends BaseModel
     public function getAvatarUrlAttribute(): ?string
     {
         if (empty($this->avatar)) {
-            return config('miaosha.default_avatar');
+            return config('miaosha.default.default_avatar');
         }
         
         if (strpos($this->avatar, 'http') === 0) {

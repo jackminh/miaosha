@@ -4,7 +4,17 @@ namespace Jackminh\Miaosha;
 
 use Illuminate\Support\ServiceProvider;
 use Jackminh\Miaosha\Console\Commands\MiaoshaCommand;
+use Jackminh\Miaosha\Console\Commands\MiaoshaHotCommand;
+use Jackminh\Miaosha\Console\Commands\MiaoshaSyncInventoryToDbCommand;
+use Jackminh\Miaosha\Console\Commands\MiaoshaGenTokenCommand;
 use Jackminh\Miaosha\Services\MiaoshaService;
+use Jackminh\Miaosha\Services\AntifraudService;
+use Jackminh\Miaosha\Services\SeckillService;
+use Jackminh\Miaosha\Services\SeckilltokenService;
+use Jackminh\Miaosha\Services\OrderService;
+use Jackminh\Miaosha\Services\SeckillorderService;
+
+
 use Jackminh\Miaosha\Contracts\UserRepositoryInterface;
 use Jackminh\Miaosha\Contracts\GoodsRepositoryInterface;
 
@@ -13,6 +23,11 @@ use Jackminh\Miaosha\Repositories\GoodsRepository;
 
 use Jackminh\Miaosha\Contracts\GoodsItemRepositoryInterface;
 use Jackminh\Miaosha\Repositories\GoodsItemRepository;
+
+
+use Jackminh\Miaosha\Contracts\SeckillActivityRepositoryInterface;
+use Jackminh\Miaosha\Repositories\SeckillActivityRepository;
+
 
 class MiaoshaServiceProvider extends ServiceProvider
 {
@@ -36,7 +51,10 @@ class MiaoshaServiceProvider extends ServiceProvider
         //注册命令
         if($this->app->runningInConsole()){
             $this->commands([
-                MiaoshaCommand::class
+                MiaoshaCommand::class,
+                MiaoshaHotCommand::class,
+                MiaoshaSyncInventoryToDbCommand::class,
+                MiaoshaGenTokenCommand::class
             ]);
         }
 
@@ -49,14 +67,39 @@ class MiaoshaServiceProvider extends ServiceProvider
         $this->app->bind(GoodsRepositoryInterface::class, GoodsRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(GoodsItemRepositoryInterface::class, GoodsItemRepository::class);
-        
+        $this->app->bind(SeckillActivityRepositoryInterface::class, SeckillActivityRepository::class);
+        $this->app->bind(OrderRepositoryInterface::class, OrderRepository::class);
 
         $this->mergeConfigFrom(
             __DIR__.'/../config/miaosha.php','miaosha'
         );
-        // 注册主服务
-        $this->app->singleton('miaosha', function ($app) {
-            return new MiaoshaService(
+        // 监控服务
+        $this->app->singleton('antifraud', function ($app) {
+            return new AntifraudService(
+                config('miaosha',[])
+            );
+        });
+        // 秒杀服务
+        $this->app->singleton('seckill', function ($app) {
+            return new SeckillService(
+                config('miaosha',[])
+            );
+        });
+        // 秒杀token服务
+        $this->app->singleton('seckilltoken', function ($app) {
+            return new SeckilltokenService(
+                config('miaosha',[])
+            );
+        });
+        //订单服务
+        $this->app->singleton('order',function($app) {
+            return new OrderService(
+                config('miaosha',[])
+            );
+        });
+        //秒杀订单服务
+        $this->app->singleton('seckillorder',function($app) {
+            return new SeckillorderService(
                 config('miaosha',[])
             );
         });

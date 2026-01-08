@@ -44,7 +44,7 @@ class Goods extends BaseModel
     public function getImageUrlAttribute(): string
     {
         if (empty($this->image)) {
-            return config('miaosha.default_image');
+            return config('miaosha.default.default_image');
         }
         if (Str::startsWith($this->image, ['http://', 'https://'])) {
             return $this->image;
