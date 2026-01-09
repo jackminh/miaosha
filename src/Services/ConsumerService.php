@@ -34,7 +34,7 @@ class ConsumerService
                 continue;
             }
             try {
-                dump($data);
+                
                 $orderData = json_decode($data, true);
                 if(json_last_error() !== JSON_ERROR_NONE) {
                     throw new \Exception('JSON 解析失败: ' . json_last_error_msg());

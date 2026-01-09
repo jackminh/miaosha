@@ -88,6 +88,35 @@ local script_get_token = [[
 - [ ] 降级策略
 - [ ] 限流熔断
 
+# laravel 项目中 database.php配置增加 专门秒杀的redis
+`
+'seckill' => [
+    'url' => env('REDIS_URL'),
+    'host' => env('REDIS_HOST', '127.0.0.1'),
+    'username' => env('REDIS_USERNAME'),
+    'password' => env('REDIS_PASSWORD'),
+    'port' => env('REDIS_PORT', '6379'),
+    'database' => env('REDIS_DB', '1'),
+    'max_retries' => env('REDIS_MAX_RETRIES', 3),
+    'backoff_algorithm' => env('REDIS_BACKOFF_ALGORITHM', 'decorrelated_jitter'),
+    'backoff_base' => env('REDIS_BACKOFF_BASE', 100),
+    'backoff_cap' => env('REDIS_BACKOFF_CAP', 1000),
+]
+`
+# laravel 项目中 queue.php配置增加 专门秒杀的redis 队列
+`
+// 秒杀专用队列
+'seckill' => [
+    'driver'        => 'redis',    // 必须指定 driver
+    'connection'    => 'seckill',  // ← 指向 database.php 中的 'seckill' Redis 连接
+    'queue'         => 'seckill_default',
+    'retry_after'   => 60,        // 秒杀场景可以短一些
+    'block_for'     => 5,
+    'after_commit'  => false,
+],
+`
+
+
 # nginx 配置
 `
 # nginx.conf

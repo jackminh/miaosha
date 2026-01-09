@@ -16,10 +16,8 @@ return new class extends Migration
             $table->dateTime('expire_at')->comment('过期时间');
             $table->boolean('is_used')->default(false)->comment('是否使用');
             $table->dateTime('used_at')->nullable()->comment('使用时间');
-            $table->timestamp('created_at')->useCurrent();
-
+            $table->timestamps();
             $table->unique('token', 'uk_token');
-            $table->index(['activity_id', 'user_id'], 'idx_activity_user');
             $table->index('expire_at', 'idx_expire');
             
             $table->comment('秒杀令牌表');

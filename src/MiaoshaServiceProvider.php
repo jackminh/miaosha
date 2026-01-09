@@ -22,7 +22,6 @@ use Jackminh\Miaosha\Services\ConsumerService;
 
 use Jackminh\Miaosha\Contracts\UserRepositoryInterface;
 use Jackminh\Miaosha\Contracts\GoodsRepositoryInterface;
-
 use Jackminh\Miaosha\Repositories\UserRepository;
 use Jackminh\Miaosha\Repositories\GoodsRepository;
 
@@ -33,8 +32,17 @@ use Jackminh\Miaosha\Repositories\GoodsItemRepository;
 use Jackminh\Miaosha\Contracts\SeckillActivityRepositoryInterface;
 use Jackminh\Miaosha\Repositories\SeckillActivityRepository;
 
-use Jackminh\Miaosha\Repositories\SeckillOrderRepositoryInterface;
+use Jackminh\Miaosha\Contracts\SeckillOrderRepositoryInterface;
 use Jackminh\Miaosha\Repositories\SeckillOrderRepository;
+
+
+use Jackminh\Miaosha\Contracts\SeckillTokenRepositoryInterface;
+use Jackminh\Miaosha\Repositories\SeckillTokenRepository;
+
+use Jackminh\Miaosha\Contracts\InventoryLogRepositoryInterface;
+use Jackminh\Miaosha\Repositories\InventoryLogRepository;
+
+
 
 
 class MiaoshaServiceProvider extends ServiceProvider
@@ -82,7 +90,9 @@ class MiaoshaServiceProvider extends ServiceProvider
 
         $this->app->bind(SeckillOrderRepositoryInterface::class, SeckillOrderRepository::class);
 
+        $this->app->bind(SeckillTokenRepositoryInterface::class, SeckillTokenRepository::class);
 
+        $this->app->bind(InventoryLogRepositoryInterface::class, InventoryLogRepository::class);
 
 
 

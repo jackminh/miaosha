@@ -5,15 +5,25 @@ namespace Jackminh\Miaosha\Services;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\App;
+use Jackminh\Miaosha\Jobs\StoreTokenJob;
+
+use Jackminh\Miaosha\Repositories\SeckillTokenRepository;
 
 class SeckillTokenService
 {
     protected array $config;
-
+    protected SeckillTokenRepository $seckillTokenRepository;
+   
+  
     public function __construct(array $config = []){
         
         $this->config = $config ?: config("miaosha",[]);
         
+        $this->seckillTokenRepository = App::make(SeckillTokenRepository::class);
+
+
+
     }
 
     /**
@@ -29,8 +39,22 @@ class SeckillTokenService
     {
         // 1. 生成唯一令牌
         $token = $this->createUniqueToken();
+        // 2. 原子性操作：检查并设置
+        $lockKey = "seckll:token_lock:{$userId}:{$activityId}";
+        $lock = Redis::connection('seckill')->setnx($lockKey, 1);
+        Redis::connection('seckill')->expire($lockKey, 5);
+        if(!$lock){
+            throw new \Exception("请勿重复请求");
+        }
         // 2. 存储令牌信息到Redis
         $this->storeToken($token, $userId, $activityId, $productId);     
+       
+        // 3. 异步队列写
+        dispatch(new StoreTokenJob($token))->onConnection('seckill')->onQueue('seckill_tokens');
+
+        // 4.释放锁
+        Redis::connection("seckill")->del($lockKey);
+
         return $token;
     }
     
@@ -52,6 +76,7 @@ class SeckillTokenService
                 'status'      => 'pending', // pending, used, expired
             ];
             Redis::connection('seckill')->setex($key, $ttl, json_encode($data));
+
         }catch(\Exception $e){
             Log::error('创建token失败', [
                 'data'  => $data,

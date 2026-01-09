@@ -18,8 +18,7 @@ return new class extends Migration
             $table->integer('before_quantity')->comment('变更前数量');
             $table->integer('after_quantity')->comment('变更后数量');
             $table->string('remark', 255)->nullable()->comment('备注');
-            $table->timestamp('created_at')->useCurrent();
-
+            $table->timestamps();
             $table->index('activity_id', 'idx_activity_id');
             $table->index('order_sn', 'idx_order_sn');
             
