@@ -108,7 +108,6 @@ class StoreTokenJob implements ShouldQueue
             if(json_last_error() !== JSON_ERROR_NONE) {
                 throw new \Exception('JSON 解析失败: ' . json_last_error_msg());
             }
-            dump($tokenData);
             $isUsed = match($tokenData['status'] ?? '') {
                 'used'      => 1,
                 'pending'   => 0,

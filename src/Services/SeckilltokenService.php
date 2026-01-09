@@ -136,6 +136,10 @@ class SeckillTokenService
             
             //更新令牌状态
             Redis::connection('seckill')->setex($key, $ttl, json_encode($tokenData));
+
+            //异步队列更新token
+            dispatch(new StoreTokenJob($token))->onConnection('seckill')->onQueue('seckill_tokens');
+
         }catch(\Exception $e){
             Log::error('标记token已使用失败', [
                 'token'  => $token,

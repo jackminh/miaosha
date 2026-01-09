@@ -39,11 +39,11 @@ class SeckillTokenRepository implements SeckillTokenRepositoryInterface
      */
     public function createSeckillToken(array $tokenData): SeckillToken
     {
-
-        $seckillToken = SeckillToken::create([
+        $seckillToken = SeckillToken::updateOrCreate([
+            'token'          => $tokenData['token']
+        ],[
             'activity_id'    => $tokenData['activity_id'],
             'user_id'        => $tokenData['user_id'],
-            'token'          => $tokenData['token'],
             'expire_at'      => $tokenData['expire_at'],
             'is_used'        => $tokenData['is_used'],
             'used_at'        => $tokenData['used_at']
